@@ -1,3 +1,4 @@
+import warnings
 from pathlib import Path
 from typing import NotRequired, TypedDict
 
@@ -5,6 +6,8 @@ import whisperx
 from better_profanity import profanity
 from pydub import AudioSegment
 from rich import print_json
+
+warnings.filterwarnings("ignore")
 
 
 class Word(TypedDict):
@@ -100,8 +103,11 @@ class AudioCensor:
                         # Generate a 1000 Hz sine wave beep with matching duration
                         replacement = (
                             Sine(1000)
-                            .to_audio_segment(duration=duration)
-                            .apply_gain(-3)
+                            .to_audio_segment(duration=end_ms - start_ms)
+                            .apply_gain(-6)
+                            .set_frame_rate(audio.frame_rate)
+                            .set_channels(audio.channels)
+                            .set_sample_width(audio.sample_width)
                         )
                     else:
                         replacement = AudioSegment.silent(duration=duration)
@@ -118,6 +124,7 @@ ac.mute_audio(
     input_path="./sample.wav",
     output_path="./sample-censored.wav",
     word_segments=ac.detect_profanity(words),
+    beep=True,
 )
 
 
