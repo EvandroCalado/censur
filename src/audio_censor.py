@@ -2,6 +2,7 @@ from typing import NotRequired, TypedDict
 
 import whisperx
 from better_profanity import profanity
+from pydub import AudioSegment
 from rich import print_json
 
 
@@ -26,7 +27,6 @@ class AudioCensor:
         self.compute_type = compute_type
         self.language = language
 
-        # Load models once and store them as attributes
         self.model = whisperx.load_model(
             self.model_name,
             device=self.device,
@@ -44,13 +44,10 @@ class AudioCensor:
         Transcribes audio using WhisperX on CPU with English language setting,
         and performs forced alignment to return word/segment timestamps.
         """
-        # 1. Load audio
         audio = whisperx.load_audio(audio_path)
 
-        # 2. Transcribe with Whisper
         result = self.model.transcribe(audio, batch_size=16, language=self.language)
 
-        # 3. Align whisper output using preloaded align model
         aligned_result = whisperx.align(
             result["segments"],
             self.align_model,
@@ -72,9 +69,43 @@ class AudioCensor:
             segment["flagged"] = profanity.contains_profanity(word_text)
         return word_segments
 
+    def mute_audio(
+        self,
+        input_path: str,
+        output_path: str,
+        word_segments: list[Word],
+    ) -> None:
+        """
+        Loops over the word segments and mutes the audio where a word is flagged.
+        Saves the updated audio at the output_path using pydub.
+        """
+
+        audio = AudioSegment.from_file(input_path)
+
+        for segment in word_segments:
+            if segment.get("flagged", False):
+                start_ms = int(segment.get("start", 0) * 1000)
+                end_ms = int(segment.get("end", 0) * 1000)
+
+                # Ensure the time bounds are valid within the audio duration
+                start_ms = max(0, start_ms)
+                end_ms = min(len(audio), end_ms)
+
+                if start_ms < end_ms:
+                    silent_chunk = AudioSegment.silent(duration=end_ms - start_ms)
+                    audio = audio[:start_ms] + silent_chunk + audio[end_ms:]
+
+        audio.export(output_path)
+
 
 ac = AudioCensor()
 words = ac.transcribe_audio("./sample.wav")
+
+ac.mute_audio(
+    input_path="./sample.wav",
+    output_path="./sample-cencored.wav",
+    word_segments=ac.detect_profanity(words),
+)
 
 
 print_json(data=ac.detect_profanity(words))
