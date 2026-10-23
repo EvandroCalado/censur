@@ -43,7 +43,7 @@ class AudioCensor:
 
         profanity.load_censor_words()
 
-    def transcribe_audio(self, audio_path: str) -> list[dict]:
+    def transcribe_audio(self, audio_path: str) -> list[Word]:
         """
         Transcribes audio using WhisperX on CPU with English language setting,
         and performs forced alignment to return word/segment timestamps.
@@ -63,7 +63,7 @@ class AudioCensor:
 
         return aligned_result["word_segments"]
 
-    def detect_profanity(self, word_segments: list[dict]) -> list[dict]:
+    def detect_profanity(self, word_segments: list[Word]) -> list[Word]:
         """
         Detects profanity for each word segment using better_profanity,
         setting the 'flagged' key on each word dict.
