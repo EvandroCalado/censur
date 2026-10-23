@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import NotRequired, TypedDict
 
 import whisperx
@@ -74,11 +75,13 @@ class AudioCensor:
         input_path: str,
         output_path: str,
         word_segments: list[Word],
+        beep: bool = False,
     ) -> None:
         """
-        Loops over the word segments and mutes the audio where a word is flagged.
+        Loops over the word segments and mutes or beeps the audio where a word is flagged.
         Saves the updated audio at the output_path using pydub.
         """
+        from pydub.generators import Sine
 
         audio = AudioSegment.from_file(input_path)
 
@@ -92,10 +95,20 @@ class AudioCensor:
                 end_ms = min(len(audio), end_ms)
 
                 if start_ms < end_ms:
-                    silent_chunk = AudioSegment.silent(duration=end_ms - start_ms)
-                    audio = audio[:start_ms] + silent_chunk + audio[end_ms:]
+                    duration = end_ms - start_ms
+                    if beep:
+                        # Generate a 1000 Hz sine wave beep with matching duration
+                        replacement = (
+                            Sine(1000)
+                            .to_audio_segment(duration=duration)
+                            .apply_gain(-3)
+                        )
+                    else:
+                        replacement = AudioSegment.silent(duration=duration)
+                    audio = audio[:start_ms] + replacement + audio[end_ms:]
 
-        audio.export(output_path)
+        output_format = Path(output_path).suffix.lstrip(".").lower() or "wav"
+        audio.export(output_path, format=output_format)
 
 
 ac = AudioCensor()
@@ -103,7 +116,7 @@ words = ac.transcribe_audio("./sample.wav")
 
 ac.mute_audio(
     input_path="./sample.wav",
-    output_path="./sample-cencored.wav",
+    output_path="./sample-censored.wav",
     word_segments=ac.detect_profanity(words),
 )
 
