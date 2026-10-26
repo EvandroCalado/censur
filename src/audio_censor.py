@@ -103,11 +103,8 @@ class AudioCensor:
                         # Generate a 1000 Hz sine wave beep with matching duration
                         replacement = (
                             Sine(1000)
-                            .to_audio_segment(duration=end_ms - start_ms)
+                            .to_audio_segment(duration=duration)
                             .apply_gain(-6)
-                            .set_frame_rate(audio.frame_rate)
-                            .set_channels(audio.channels)
-                            .set_sample_width(audio.sample_width)
                         )
                     else:
                         replacement = AudioSegment.silent(duration=duration)
