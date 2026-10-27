@@ -1,8 +1,10 @@
 from sqlalchemy import create_engine
 from sqlmodel import SQLModel
 
+from src.config import settings
+
 engine = create_engine(
-    'postgresql+psycopg2://censur:censur@localhost:5432/censur',
+    settings.DB_URL,
     echo=True,
 )
 
