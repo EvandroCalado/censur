@@ -3,10 +3,18 @@ from fastapi.staticfiles import StaticFiles
 from scalar_fastapi import get_scalar_api_reference
 
 from src.audio_censor import AudioCensor
+from src.database.session import init_db
 
 UPLOADS_DIR = 'uploads'
 
 app = FastAPI(docs_url=None)
+
+
+@app.on_event('startup')
+def on_startup():
+    init_db()
+
+
 app.mount(
     '/uploads',
     StaticFiles(directory=UPLOADS_DIR),
