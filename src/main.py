@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, UploadFile
 from fastapi.staticfiles import StaticFiles
 from scalar_fastapi import get_scalar_api_reference
@@ -7,14 +9,14 @@ from src.database.session import init_db
 
 UPLOADS_DIR = 'uploads'
 
-app = FastAPI(docs_url=None)
 
-
-@app.on_event('startup')
-def on_startup():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     init_db()
+    yield
 
 
+app = FastAPI(docs_url=None, lifespan=lifespan)
 app.mount(
     '/uploads',
     StaticFiles(directory=UPLOADS_DIR),

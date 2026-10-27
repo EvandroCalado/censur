@@ -1,0 +1,15 @@
+services:
+    postgres:
+        image: postgres:18
+        container_name: censur-postgres
+        environment:
+            POSTGRES_DB: censur
+            POSTGRES_USER: censur
+            POSTGRES_PASSWORD: censur
+        ports:
+            - "5432:5432"
+        volumes:
+            - postgres_data:/var/lib/postgresql
+
+volumes:
+    postgres_data:
