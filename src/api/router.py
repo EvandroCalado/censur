@@ -1,36 +1,29 @@
-from typing import Annotated
+from uuid import UUID
 
-from fastapi import APIRouter, Depends, UploadFile
-from sqlmodel import Session
+from fastapi import APIRouter, UploadFile, status
 
+from src.api.dependecies import AudioServiceDep
+from src.api.schemas import AudioRead
 from src.audio_censor import AudioCensor
-from src.database.session import get_session
-from src.service.audio import AudioService
 
 router = APIRouter()
 ac = AudioCensor()
 
 
-@router.post('/')
-def censor_audio(
-    audio_file: UploadFile, session: Annotated[Session, Depends(get_session)]
-):
-    audio = AudioService(session).add_audio(audio_file)
+@router.post(
+    '/', response_model=AudioRead, status_code=status.HTTP_201_CREATED
+)
+def censor_audio(audio_file: UploadFile, audio_service: AudioServiceDep):
+    audio = audio_service.create_audio(audio_file)
 
-    return {
-        'id': audio.id,
-        'url': f'/uploads/censored_{audio_file.filename}',
-    }
+    return audio
 
 
-# @router.get('/{id}')
-# def get_audio(id: int, session: Annotated[Session, Depends(get_session)]):
-#     audio = session.get(Audio, id)
-#     return {
-#         'id': audio.id,
-#         'file_path': audio.file_path,
-#         'censored_file_path': audio.censored_file_path,
-#     }
+@router.get('/{id}', response_model=AudioRead)
+def get_audio(id: UUID, audio_service: AudioServiceDep):
+    audio = audio_service.read_one_audio(id)
+
+    return audio
 
 
 # @router.patch('/{id}')
