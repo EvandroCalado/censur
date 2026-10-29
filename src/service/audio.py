@@ -1,7 +1,7 @@
 from uuid import UUID
 
 from fastapi import HTTPException, UploadFile, status
-from sqlmodel import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.audio_censor import AudioCensor
 from src.database.models import Audio
@@ -9,11 +9,11 @@ from src.utils import get_file_path, save_file
 
 
 class AudioService:
-    def __init__(self, session: Session):
+    def __init__(self, session: AsyncSession):
         self.session = session
         self.ac = AudioCensor()
 
-    def create_audio(self, file: UploadFile) -> Audio:
+    async def create_audio(self, file: UploadFile) -> Audio:
         file_path = save_file(file)
         output_path = get_file_path(f'censored_{file.filename}')
 
@@ -22,8 +22,8 @@ class AudioService:
         )
 
         self.session.add(audio)
-        self.session.commit()
-        self.session.refresh(audio)
+        await self.session.commit()
+        await self.session.refresh(audio)
 
         words = self.ac.transcribe_audio(file_path)
         self.ac.mute_audio(
@@ -34,8 +34,8 @@ class AudioService:
 
         return audio
 
-    def read_one_audio(self, id: UUID) -> Audio:
-        audio = self.session.get(Audio, id)
+    async def read_one_audio(self, id: UUID) -> Audio:
+        audio = await self.session.get(Audio, id)
 
         if audio is None:
             raise HTTPException(

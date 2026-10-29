@@ -1,19 +1,23 @@
 from typing import Annotated, AsyncGenerator
 
 from fastapi import Depends
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.asyncio import (
+    async_sessionmaker,
+    create_async_engine,
+)
 from sqlmodel import SQLModel
+from sqlmodel.ext.asyncio.session import (
+    AsyncSession,
+)
 
 from src.config import settings
 
 engine = create_async_engine(
     settings.DB_URL,
     echo=True,
-    future=True,
 )
 
-async_session_maker = sessionmaker(
+async_session_maker = async_sessionmaker(
     bind=engine,
     class_=AsyncSession,
     expire_on_commit=False,

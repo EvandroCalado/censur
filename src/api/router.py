@@ -13,15 +13,15 @@ ac = AudioCensor()
 @router.post(
     '/', response_model=AudioRead, status_code=status.HTTP_201_CREATED
 )
-def censor_audio(audio_file: UploadFile, audio_service: AudioServiceDep):
-    audio = audio_service.create_audio(audio_file)
+async def create_audio(audio_file: UploadFile, audio_service: AudioServiceDep):
+    audio = await audio_service.create_audio(audio_file)
 
     return audio
 
 
 @router.get('/{id}', response_model=AudioRead)
-def get_audio(id: UUID, audio_service: AudioServiceDep):
-    audio = audio_service.read_one_audio(id)
+async def read_audio(id: UUID, audio_service: AudioServiceDep):
+    audio = await audio_service.read_one_audio(id)
 
     return audio
 
