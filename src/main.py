@@ -4,8 +4,9 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from scalar_fastapi import get_scalar_api_reference
 
-from src.api.router import router
+from src.audio.routes import router as audio_routes
 from src.database.session import init_db
+from src.user.routes import router as user_routes
 from src.utils import UPLOADS_DIR
 
 
@@ -22,8 +23,14 @@ app.mount(
     name='uploads',
 )
 
+
 app.include_router(
-    router,
+    user_routes,
+    prefix='/user',
+    tags=['User'],
+)
+app.include_router(
+    audio_routes,
     prefix='/censor',
     tags=['Censor'],
 )

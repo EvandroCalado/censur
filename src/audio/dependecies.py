@@ -2,8 +2,8 @@ from typing import Annotated
 
 from fastapi import Depends
 
+from src.audio.services import AudioService
 from src.database.session import SessionDep
-from src.service.audio import AudioService
 
 
 def get_audio_service(session: SessionDep) -> AudioService:
