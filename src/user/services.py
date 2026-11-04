@@ -17,7 +17,7 @@ class UserService:
         self.session = session
         self.pwd_context = CryptContext(schemes=['argon2'], deprecated='auto')
 
-    async def register_user(self, user_create: UserCreate) -> User:
+    async def register(self, user_create: UserCreate) -> User:
         existing_user = await self.session.execute(
             select(User).where(User.email == user_create.email)
         )
@@ -39,7 +39,7 @@ class UserService:
 
         return user
 
-    async def login_user(self, email: str, password: str) -> User:
+    async def login(self, email: str, password: str) -> User:
         user = await self.session.scalar(
             select(User).where(User.email == email)
         )
