@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.audio.censor import Censor
 from src.audio.utils import get_file_path, save_file
-from src.database.models import Audio
+from src.database.models import Audio, User
 
 
 class AudioService:
@@ -13,12 +13,14 @@ class AudioService:
         self.session = session
         self.ac = Censor()
 
-    async def create_audio(self, file: UploadFile) -> Audio:
+    async def create(self, file: UploadFile, user: User) -> Audio:
         file_path = save_file(file)
         output_path = get_file_path(f'censored_{file.filename}')
 
         audio = Audio(
-            file_path=str(file.filename), censored_file_path=output_path
+            file_path=str(file.filename),
+            censored_file_path=output_path,
+            user_id=user.id,
         )
 
         self.session.add(audio)
@@ -34,7 +36,7 @@ class AudioService:
 
         return audio
 
-    async def read_one_audio(self, id: UUID) -> Audio:
+    async def read_one(self, id: UUID) -> Audio:
         audio = await self.session.get(Audio, id)
 
         if audio is None:

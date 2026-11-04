@@ -14,43 +14,21 @@ censor = Censor()
 @router.post(
     '/', response_model=AudioRead, status_code=status.HTTP_201_CREATED
 )
-async def create_audio(audio_file: UploadFile, audio_service: AudioServiceDep):
-    audio = await audio_service.create_audio(audio_file)
+async def create_audio(
+    audio_file: UploadFile, audio_service: AudioServiceDep, user: UserDep
+):
+    audio = await audio_service.create(audio_file, user)
 
     return audio
+
+
+@router.get('/', response_model=list[AudioRead])
+async def read_all(service: AudioServiceDep, user: UserDep):
+    return user.audios
 
 
 @router.get('/{id}', response_model=AudioRead)
-async def read_audio(id: UUID, audio_service: AudioServiceDep, user: UserDep):
-    audio = await audio_service.read_one_audio(id)
+async def read_one(id: UUID, audio_service: AudioServiceDep, user: UserDep):
+    audio = await audio_service.read_one(id)
 
     return audio
-
-
-# @router.patch('/{id}')
-# def update_audio(
-#     id: int,
-#     audio_file: UploadFile,
-#     session: Annotated[Session, Depends(get_session)],
-# ):
-#     file_path = f'{UPLOADS_DIR}/{audio_file.filename}'
-#     output_path = f'{UPLOADS_DIR}/censored_{audio_file.filename}'
-
-#     audio = session.get(Audio, id)
-#     audio.file_path = file_path
-#     audio.censored_file_path = output_path
-#     session.commit()
-
-#     return {'url': f'/uploads/censored_{audio_file.filename}'}
-
-
-# @router.delete('/{id}')
-# def delete_audio(
-#     id: int,
-#     session: Annotated[Session, Depends(get_session)],
-# ):
-#     audio = session.get(Audio, id)
-#     session.deleted(audio)
-#     session.commit()
-
-#     return {'message': f'Audio with id {id} deleted successfully.'}

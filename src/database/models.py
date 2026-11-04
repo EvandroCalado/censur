@@ -12,7 +12,9 @@ class User(SQLModel, table=True):
         default_factory=lambda: datetime.now(timezone.utc)
     )
 
-    audios: list['Audio'] = Relationship(back_populates='user')
+    audios: list['Audio'] = Relationship(
+        back_populates='user', sa_relationship_kwargs={'lazy': 'selectin'}
+    )
 
 
 class Audio(SQLModel, table=True):
@@ -24,4 +26,6 @@ class Audio(SQLModel, table=True):
     )
 
     user_id: UUID = Field(foreign_key='user.id')
-    user: User = Relationship(back_populates='audios')
+    user: User = Relationship(
+        back_populates='audios', sa_relationship_kwargs={'lazy': 'selectin'}
+    )
