@@ -1,4 +1,5 @@
-import datetime
+from datetime import datetime, timedelta, timezone
+from uuid import UUID
 
 import jwt
 from fastapi import HTTPException, status
@@ -47,22 +48,29 @@ class UserService:
             raise HTTPException(
                 detail='Invalid credentials',
                 status_code=status.HTTP_401_UNAUTHORIZED,
+                headers={'WWW-Authenticate': 'Bearer'},
             )
 
         if not self.pwd_context.verify(password, user.password_hash):
             raise HTTPException(
                 detail='Invalid credentials',
                 status_code=status.HTTP_401_UNAUTHORIZED,
+                headers={'WWW-Authenticate': 'Bearer'},
             )
+
+        return user
+
+    async def get_user(self, id: UUID) -> User | None:
+        user = await self.session.scalar(select(User).where(User.id == id))
 
         return user
 
     @staticmethod
     def create_access_token(user: User) -> str:
-        now = datetime.datetime.now(datetime.timezone.utc)
+        now = datetime.now(timezone.utc)
         payload = {
             'sub': str(user.id),
-            'exp': now + datetime.timedelta(minutes=15),
+            'exp': now + timedelta(minutes=15),
         }
 
         return jwt.encode(

@@ -5,6 +5,7 @@ from fastapi import APIRouter, UploadFile, status
 from src.audio.dependecies import AudioServiceDep
 from src.audio.schemas import AudioRead
 from src.audio_censor import AudioCensor
+from src.user.dependecies import UserDep
 
 router = APIRouter()
 ac = AudioCensor()
@@ -20,7 +21,7 @@ async def create_audio(audio_file: UploadFile, audio_service: AudioServiceDep):
 
 
 @router.get('/{id}', response_model=AudioRead)
-async def read_audio(id: UUID, audio_service: AudioServiceDep):
+async def read_audio(id: UUID, audio_service: AudioServiceDep, user: UserDep):
     audio = await audio_service.read_one_audio(id)
 
     return audio

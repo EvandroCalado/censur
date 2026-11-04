@@ -10,7 +10,7 @@ router = APIRouter()
 
 
 @router.post(
-    '/signup', response_model=UserRead, status_code=status.HTTP_201_CREATED
+    '/register', response_model=UserRead, status_code=status.HTTP_201_CREATED
 )
 async def register_user(user_create: UserCreate, user_service: UserServiceDep):
     user = await user_service.register_user(user_create)
