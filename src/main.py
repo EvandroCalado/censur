@@ -5,9 +5,9 @@ from fastapi.staticfiles import StaticFiles
 from scalar_fastapi import get_scalar_api_reference
 
 from src.audio.routes import router as audio_routes
+from src.audio.utils import UPLOADS_DIR
 from src.database.session import init_db
 from src.user.routes import router as user_routes
-from src.utils import UPLOADS_DIR
 
 
 @asynccontextmanager

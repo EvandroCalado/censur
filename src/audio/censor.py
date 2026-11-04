@@ -18,7 +18,7 @@ class Word(TypedDict):
     flagged: NotRequired[bool]
 
 
-class AudioCensor:
+class Censor:
     def __init__(
         self,
         model_name: str = 'small',

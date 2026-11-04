@@ -3,15 +3,15 @@ from uuid import UUID
 from fastapi import HTTPException, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.audio_censor import AudioCensor
+from src.audio.censor import Censor
+from src.audio.utils import get_file_path, save_file
 from src.database.models import Audio
-from src.utils import get_file_path, save_file
 
 
 class AudioService:
     def __init__(self, session: AsyncSession):
         self.session = session
-        self.ac = AudioCensor()
+        self.ac = Censor()
 
     async def create_audio(self, file: UploadFile) -> Audio:
         file_path = save_file(file)
