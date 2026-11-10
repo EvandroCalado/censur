@@ -8,17 +8,22 @@ dependencies = [
     "alembic>=1.20.1",
     "asyncpg>=0.32.0",
     "better-profanity>=0.7.0",
+    "celery>=5.7.0",
     "fastapi[all]>=0.162.0",
     "passlib[argon2]>=1.7.4",
     "psycopg2>=2.9.13",
     "pydantic-settings>=2.16.1",
     "pydub>=0.25.1",
     "pyjwt>=2.15.1",
+    "redis>=8.1.0",
     "scalar-fastapi>=1.9.1",
     "sqlalchemy[asyncio]>=2.1.6",
     "sqlmodel>=0.0.48",
     "whisperx>=3.8.6",
 ]
+
+[dependency-groups]
+dev = ["poethepoet>=0.49.0"]
 
 [tool.ruff]
 line-length = 79
@@ -31,3 +36,6 @@ select = ['I', 'F', 'E', 'W', 'PL', 'PT', 'FAST']
 [tool.ruff.format]
 preview = true
 quote-style = 'single'
+
+[tool.poe.tasks]
+worker = 'celery -A src.worker.tasks worker --loglevel=INFO --pool=solo'

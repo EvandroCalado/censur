@@ -2,10 +2,10 @@ from uuid import UUID
 
 from fastapi import APIRouter, UploadFile, status
 
-from src.audio.censor import Censor
 from src.audio.dependecies import AudioServiceDep
 from src.audio.schemas import AudioRead
 from src.user.dependecies import UserDep
+from src.worker.censor import Censor
 
 router = APIRouter()
 censor = Censor()

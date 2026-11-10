@@ -3,9 +3,10 @@ from uuid import UUID
 from fastapi import HTTPException, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.audio.censor import Censor
 from src.audio.utils import get_file_path, save_file
 from src.database.models import Audio, User
+from src.worker.censor import Censor
+from src.worker.tasks import censor_audio_task
 
 
 class AudioService:
@@ -19,7 +20,6 @@ class AudioService:
 
         audio = Audio(
             file_path=str(file.filename),
-            censored_file_path=output_path,
             user_id=user.id,
         )
 
@@ -27,12 +27,7 @@ class AudioService:
         await self.session.commit()
         await self.session.refresh(audio)
 
-        words = self.ac.transcribe_audio(file_path)
-        self.ac.mute_audio(
-            input_path=file_path,
-            output_path=output_path,
-            word_segments=self.ac.detect_profanity(words),
-        )
+        censor_audio_task.delay(str(audio.id))
 
         return audio
 
