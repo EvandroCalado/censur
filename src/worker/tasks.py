@@ -14,6 +14,10 @@ celery_app = Celery('tassks', broker=settings.BROKER_URL)
 def censor_audio_task(self: Censor, id: str):
     with self.session_local() as session:
         audio = session.get(Audio, UUID(id))
+
+        if audio is None:
+            raise ValueError(f'Audio com id {id} não encontrado')
+
         audio.status = AudioStatus.processing
 
         session.add(audio)
